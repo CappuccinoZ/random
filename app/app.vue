@@ -69,6 +69,8 @@
               <span v-for="num in result" class="px-2 py-1 rounded bg-blue-100 ">{{ num }}</span>
             </div>
           </div>
+
+          <p v-if="lastTime" class="mt-2">生成时间：{{ lastTime }}</p>
         </div>
       </div>
     </div>
@@ -82,6 +84,7 @@ const blocks = ref(1)
 const loading = ref(false)
 const result = ref([])
 const message = ref(null)
+const lastTime = ref('')
 
 const range = computed(() => {
   return max.value - min.value + 1
@@ -113,6 +116,7 @@ function checkInput1() {
 }
 
 async function generate_random_numbers() {
+  const now = new Date().toLocaleString()
   message.value = checkInput1()
   if (message.value) {
     alert_modal.showModal()
@@ -130,6 +134,7 @@ async function generate_random_numbers() {
     }
   })
 
+  lastTime.value = now
   loading.value = false
 }
 </script>

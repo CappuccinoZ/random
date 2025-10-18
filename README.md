@@ -3,7 +3,7 @@
 
 ## 功能
 输入最小值(min)、最大值(max)与生成数量(blocks)后，点击“生成随机数”即可生成随机数。
-确保min、max与blocks是整数，blocks范围1~100，range = (max-min+1)范围1~1048575。
+确保min、max与blocks是整数，blocks范围[1, 100]，range = (max-min+1)范围[1, 104,8575]。
 
 ## 安装和运行
 ```bash
