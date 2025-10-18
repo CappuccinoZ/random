@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme {
+    --color-sakura: rgb(139, 90, 140);
+}
