@@ -15,17 +15,17 @@
 
           <div class="mt-3 px-3 py-6 bg-gradient-to-br from-gray-50 to-pink-50 border border-pink-100 rounded-lg">
             <div class="flex flex-col space-y-2">
-              <label class="input input-primary w-full tooltip" data-tip="最小值(min)，整数类型">
+              <label class="input input-primary w-full tooltip" data-tip="最小值(min)，整数类型，范围 ±1e15">
                 <span class="label text-primary/90">最小值</span>
-                <input type="number" v-model="min"></input>
+                <input type="number" v-model="min" min="-1e15" max="1e15"></input>
               </label>
 
-              <label class="input input-primary w-full tooltip" data-tip="最大值(max)，整数类型">
+              <label class="input input-primary w-full tooltip" data-tip="最大值(max)，整数类型，范围 ±1e15">
                 <span class="label text-primary/90">最大值</span>
-                <input type="number" v-model="max"></input>
+                <input type="number" v-model="max" min="-1e15" max="1e15"></input>
               </label>
 
-              <label class="input input-primary w-full tooltip" data-tip="生成数量(blocks)，整数类型，范围1~100">
+              <label class="input input-primary w-full tooltip" data-tip="生成数量(blocks)，整数类型，范围 [1, 100]">
                 <span class="label text-primary/90">生成数量</span>
                 <input type="number" v-model="blocks" min="1" max="100" class="validator"></input>
               </label>
@@ -56,8 +56,8 @@
           <div class="modal-box space-y-2">
             <h3 class="text-xl font-semibold">CappuccinoZ/random</h3>
             <p>输入最小值(min)、最大值(max)与生成数量(blocks)后，点击“生成随机数”即可生成随机数。</p>
-            <p>确保min、max与blocks是整数，blocks范围1~100，range = (max-min+1)范围1~1048575。</p>
-            <p>算法：min + (range*num >> 30)，range是生成随机数的区间长度(不超过20位), num是从QRNG API获取的量子随机数(30位)。</p>
+            <p>确保min、max与blocks是整数，blocks范围 [1, 100]，min和max范围 ±1e15，且 max >= min。</p>
+            <p>算法：min + (range*q >> k)，range是生成随机数的区间长度, q是从QRNG API获取的量子随机数，k是右移位数。</p>
             <p>链接：
               <a class="link" href="https://github.com/CappuccinoZ/random">GitHub项目地址</a> |
               <a class="link" href="https://outshift.cisco.com/quantum-random-number-generator">QRNG API</a>
@@ -90,30 +90,28 @@ const result = ref([])
 const message = ref(null)
 const lastTime = ref('')
 
-const range = computed(() => {
-  return max.value - min.value + 1
-})
-
 function checkInput1() {
   if (min.value === '' || max.value === '' || blocks === '') {
     return '缺少参数: min, max, blocks'
   }
 
-  if (typeof min.value !== 'number' || !Number.isInteger(min.value)) {
-    return '最小值(min)必须是整数'
+  if (typeof min.value !== 'number' || !Number.isInteger(min.value) ||
+    (min.value < -1e15 || min.value > 1e15)) {
+    return '最小值(min)必须是整数，且范围 ±1e15'
   }
 
-  if (typeof max.value !== 'number' || !Number.isInteger(max.value)) {
-    return '最大值(max)必须是整数'
+  if (typeof max.value !== 'number' || !Number.isInteger(max.value) ||
+    (max.value < -1e15 || max.value > 1e15)) {
+    return '最大值(max)必须是整数，且范围 ±1e15'
+  }
+
+  if (max.value < min.value) {
+    return '应满足: max >= min'
   }
 
   if (typeof blocks.value !== 'number' || !Number.isInteger(blocks.value) ||
     (blocks.value < 1 || blocks.value > 100)) {
-    return '生成数量(blocks)必须是整数，且 1 <= blocks <= 100'
-  }
-
-  if (range.value < 1 || range.value > 104_8575) {
-    return 'range = (max-min+1) 应满足: 1 <= range <= 104,8575'
+    return '生成数量(blocks)必须是整数，且范围 [1, 100]'
   }
 
   return null
@@ -134,7 +132,7 @@ async function generate_random_numbers() {
       method: 'post',
       body: {
         min: min.value,
-        range: range.value,
+        max: max.value,
         blocks: blocks.value
       },
       timeout: 10000,
