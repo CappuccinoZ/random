@@ -3,7 +3,7 @@
         <div class="container mx-auto">
             <div class="card card-lg w-full max-w-lg mx-auto text-primary bg-base-100 border border-base-300 shadow-lg">
                 <div class="card-body">
-                    <h1 class="card-title text-2xl">随机密码生成器</h1>
+                    <h1 class="card-title text-2xl">随机密码</h1>
 
                     <div
                         class="mt-3 px-3 py-6 bg-gradient-to-br from-gray-50 to-pink-50 border border-pink-100 rounded-lg">
@@ -69,31 +69,31 @@
 </template>
 
 <script setup>
-const use_char = ref(["0", "1", "2"])
+const use_char = ref(["0", "1", "2", "3"])
 const include_char = ref('')
-const exclude_char = ref('0oO1iIlLq9g')
-const password_length = ref(14)
+const exclude_char = ref('0OQlI')
+const password_length = ref(20)
 const loading = ref(false)
 const result = ref('')
 
 async function generate_password() {
     loading.value = true
 
-    let s = ''
+    let table = ''
     if (use_char.value.includes("0")) {
-        s += '0123456789'
+        table += '0123456789'
     }
     if (use_char.value.includes("1")) {
-        s += 'abcdefghijklmnopqrstuvwxyz'
+        table += 'abcdefghijklmnopqrstuvwxyz'
     }
     if (use_char.value.includes("2")) {
-        s += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        table += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     }
     if (use_char.value.includes("3")) {
-        s += '!@#$%^&*()'
+        table += '!@#$%^&*()'
     }
-    const union = Array.from(new Set(s + include_char.value))
-    s = union.filter(char => !exclude_char.value.includes(char)).join('')
+    const union = Array.from(new Set(table + include_char.value))
+    table = union.filter(char => !exclude_char.value.includes(char)).join('')
 
     let index_list = []
     try {
@@ -101,7 +101,7 @@ async function generate_password() {
             method: 'post',
             body: {
                 min: 0,
-                max: s.length - 1,
+                max: table.length - 1,
                 blocks: password_length.value
             },
             timeout: 10000,
@@ -110,7 +110,7 @@ async function generate_password() {
 
         let t = ''
         for (let i = 0; i < index_list.length; i++) {
-            t += s[index_list[i]]
+            t += table[index_list[i]]
         }
         result.value = t
     } catch (error) {

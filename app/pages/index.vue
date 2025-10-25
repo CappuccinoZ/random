@@ -62,6 +62,9 @@
               <a class="link" href="https://github.com/CappuccinoZ/random">GitHub项目地址</a> |
               <a class="link" href="https://outshift.cisco.com/quantum-random-number-generator">QRNG API</a>
             </p>
+            <p>工具：
+              <a class="link" href="/randompassword">密码生成器</a>
+            </p>
           </div>
           <form method="dialog" class="modal-backdrop">
             <button>close</button>
